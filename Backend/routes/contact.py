@@ -1,0 +1,77 @@
+import os
+import aiosmtplib
+from email.message import EmailMessage
+from typing import Optional, List
+from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
+from sqlalchemy.orm import Session
+from pydantic import BaseModel, EmailStr
+from database import get_db, ContactMessage
+from auth import get_current_user, User
+from dotenv import load_dotenv
+
+load_dotenv()
+
+router = APIRouter(prefix="/api/contact", tags=["contact"])
+
+SMTP_HOST     = os.getenv("SMTP_HOST", "smtp.gmail.com")
+SMTP_PORT     = int(os.getenv("SMTP_PORT", "587"))
+SMTP_USER     = os.getenv("SMTP_USER", "")
+SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "")
+CONTACT_EMAIL = os.getenv("CONTACT_EMAIL", "josalejandro@gmail.com")
+
+class ContactRequest(BaseModel):
+    name:    str
+    email:   EmailStr
+    subject: Optional[str] = "Mensaje desde sysnergia.com"
+    message: str
+
+class ContactResponse(BaseModel):
+    id:      int
+    name:    str
+    email:   str
+    subject: Optional[str]
+    message: str
+    read:    bool
+    class Config:
+        from_attributes = True
+
+async def send_notification(data: ContactRequest):
+    if not SMTP_USER or not SMTP_PASSWORD:
+        return
+    msg = EmailMessage()
+    msg["From"]    = SMTP_USER
+    msg["To"]      = CONTACT_EMAIL
+    msg["Subject"] = f"[sysnergia.com] {data.subject}"
+    msg.set_content(f"De: {data.name}\nEmail: {data.email}\n\n{data.message}")
+    try:
+        await aiosmtplib.send(msg, hostname=SMTP_HOST, port=SMTP_PORT,
+                              username=SMTP_USER, password=SMTP_PASSWORD, start_tls=True)
+    except Exception as e:
+        print(f"[EMAIL ERROR] {e}")
+
+@router.post("", status_code=201)
+async def send_message(data: ContactRequest, background: BackgroundTasks, db: Session=Depends(get_db)):
+    msg = ContactMessage(name=data.name, email=str(data.email),
+                         subject=data.subject, message=data.message)
+    db.add(msg); db.commit()
+    background.add_task(send_notification, data)
+    return {"ok": True, "message": "Mensaje recibido."}
+
+@router.get("", response_model=List[ContactResponse])
+def list_messages(db: Session=Depends(get_db), _: User=Depends(get_current_user)):
+    return db.query(ContactMessage).order_by(ContactMessage.created_at.desc()).all()
+
+@router.patch("/{msg_id}/read")
+def mark_read(msg_id: int, db: Session=Depends(get_db), _: User=Depends(get_current_user)):
+    msg = db.query(ContactMessage).filter(ContactMessage.id==msg_id).first()
+    if not msg:
+        raise HTTPException(status_code=404, detail="Mensaje no encontrado.")
+    msg.read = True; db.commit()
+    return {"ok": True}
+
+@router.delete("/{msg_id}", status_code=204)
+def delete_message(msg_id: int, db: Session=Depends(get_db), _: User=Depends(get_current_user)):
+    msg = db.query(ContactMessage).filter(ContactMessage.id==msg_id).first()
+    if not msg:
+        raise HTTPException(status_code=404, detail="Mensaje no encontrado.")
+    db.delete(msg); db.commit()
