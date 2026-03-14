@@ -4,10 +4,11 @@ from email.message import EmailMessage
 from typing import Optional, List
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from sqlalchemy.orm import Session
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 from database import get_db, ContactMessage
 from auth import get_current_user, User
 from dotenv import load_dotenv
+from security import MemoryRateLimiter, get_client_ip
 
 load_dotenv()
 
@@ -19,11 +20,18 @@ SMTP_USER     = os.getenv("SMTP_USER", "")
 SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "")
 CONTACT_EMAIL = os.getenv("CONTACT_EMAIL", "josalejandro@gmail.com")
 
+contact_limiter = MemoryRateLimiter(
+    limit=5,
+    window_seconds=60 * 60,
+    key_builder=lambda request: f"contact:{get_client_ip(request)}",
+    detail="Has enviado demasiados mensajes recientemente. Intenta más tarde.",
+)
+
 class ContactRequest(BaseModel):
-    name:    str
+    name:    str = Field(min_length=2, max_length=100)
     email:   EmailStr
-    subject: Optional[str] = "Mensaje desde sysnergia.com"
-    message: str
+    subject: Optional[str] = Field(default="Mensaje desde sysnergia.com", max_length=200)
+    message: str = Field(min_length=10, max_length=5000)
 
 class ContactResponse(BaseModel):
     id:      int
@@ -41,7 +49,8 @@ async def send_notification(data: ContactRequest):
     msg = EmailMessage()
     msg["From"]    = SMTP_USER
     msg["To"]      = CONTACT_EMAIL
-    msg["Subject"] = f"[sysnergia.com] {data.subject}"
+    subject = (data.subject or "Mensaje desde sysnergia.com").replace("\r", " ").replace("\n", " ").strip()
+    msg["Subject"] = f"[sysnergia.com] {subject}"
     msg.set_content(f"De: {data.name}\nEmail: {data.email}\n\n{data.message}")
     try:
         await aiosmtplib.send(msg, hostname=SMTP_HOST, port=SMTP_PORT,
@@ -49,10 +58,11 @@ async def send_notification(data: ContactRequest):
     except Exception as e:
         print(f"[EMAIL ERROR] {e}")
 
-@router.post("", status_code=201)
+@router.post("", status_code=201, dependencies=[Depends(contact_limiter)])
 async def send_message(data: ContactRequest, background: BackgroundTasks, db: Session=Depends(get_db)):
-    msg = ContactMessage(name=data.name, email=str(data.email),
-                         subject=data.subject, message=data.message)
+    subject = (data.subject or "Mensaje desde sysnergia.com").strip()
+    msg = ContactMessage(name=data.name.strip(), email=str(data.email),
+                         subject=subject, message=data.message.strip())
     db.add(msg); db.commit()
     background.add_task(send_notification, data)
     return {"ok": True, "message": "Mensaje recibido."}

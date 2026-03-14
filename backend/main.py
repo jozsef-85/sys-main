@@ -1,6 +1,8 @@
 import os
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import JSONResponse
 from dotenv import load_dotenv
 from database import init_db, SessionLocal, User
@@ -8,18 +10,34 @@ from auth import hash_password
 
 load_dotenv()
 
+
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    init_db()
+    _create_admin()
+    print("✓ Sysnergia Backend listo")
+    print(f"✓ Docs en: http://localhost:{os.getenv('PORT','8080')}/api/docs")
+    yield
+
 app = FastAPI(
     title       = "Sysnergia API",
     description = "Backend de sysnergia.com — José Leal Lizana",
     version     = "1.0.0",
+    openapi_url = "/api/openapi.json",
     docs_url    = "/api/docs",
     redoc_url   = "/api/redoc",
+    lifespan    = lifespan,
 )
 
 origins = [o.strip() for o in os.getenv(
     "ALLOWED_ORIGINS",
     "http://localhost:3000,http://localhost:8080,https://sysnergia.com,https://admin.sysnergia.com"
-).split(",")]
+).split(",") if o.strip()]
+
+allowed_hosts = [h.strip() for h in os.getenv(
+    "ALLOWED_HOSTS",
+    "sysnergia.com,www.sysnergia.com,admin.sysnergia.com,blog.sysnergia.com,localhost,127.0.0.1"
+).split(",") if h.strip()]
 
 app.add_middleware(
     CORSMiddleware,
@@ -28,6 +46,18 @@ app.add_middleware(
     allow_methods     = ["*"],
     allow_headers     = ["*"],
 )
+app.add_middleware(TrustedHostMiddleware, allowed_hosts=allowed_hosts)
+
+
+@app.middleware("http")
+async def add_security_headers(request, call_next):
+    response = await call_next(request)
+    response.headers.setdefault("X-Content-Type-Options", "nosniff")
+    response.headers.setdefault("Referrer-Policy", "same-origin")
+    response.headers.setdefault("Permissions-Policy", "camera=(), microphone=(), geolocation=()")
+    if request.url.path.startswith("/api/auth/"):
+        response.headers.setdefault("Cache-Control", "no-store")
+    return response
 
 from routes.auth     import router as auth_router
 from routes.blog     import router as blog_router
@@ -47,13 +77,6 @@ def api_status():
 def root():
     return JSONResponse({"message": "Sysnergia API — /api/docs para ver endpoints."})
 
-@app.on_event("startup")
-def on_startup():
-    init_db()
-    _create_admin()
-    print("✓ Sysnergia Backend listo")
-    print(f"✓ Docs en: http://localhost:{os.getenv('PORT','8080')}/api/docs")
-
 def _create_admin():
     username = os.getenv("ADMIN_USERNAME", "jose")
     password = os.getenv("ADMIN_PASSWORD", "")
@@ -61,6 +84,8 @@ def _create_admin():
     if not password:
         print("⚠ ADMIN_PASSWORD no configurado.")
         return
+    if len(password) < 12:
+        print("⚠ ADMIN_PASSWORD es corto; usa al menos 12 caracteres.")
     db = SessionLocal()
     try:
         if not db.query(User).filter(User.username == username).first():

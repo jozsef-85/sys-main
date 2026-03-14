@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sysnergia Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0e1014;--bg2:#13171c;--bg3:#191e25;--surface:#1e242d;
+  --gold:#c9a84c;--gold2:#e8c96a;--golddim:rgba(201,168,76,.1);
+  --silver:#8a9bb0;--text:#d4cec6;--dim:#5a6472;--mute:#2a3040;
+  --border:rgba(201,168,76,.15);--border2:rgba(255,255,255,.06);
+  --white:#f0ece8;--green:#2ecc71;--red:#e74c3c;--amber:#f39c12;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'DM Mono',monospace;overflow-x:hidden;min-height:100vh}
+a{text-decoration:none;color:inherit}
+button{cursor:pointer;font-family:'DM Mono',monospace}
+input,textarea,select{font-family:'DM Mono',monospace}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--gold)}
+
+#login-screen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:9999;transition:opacity .5s ease}
+#login-screen.hide{opacity:0;pointer-events:none}
+.login-box{width:100%;max-width:420px;padding:48px 40px;background:var(--bg2);border:1px solid var(--border);position:relative}
+.login-box::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--gold),transparent)}
+.login-logo{font-family:'Playfair Display',serif;font-size:28px;color:var(--white);font-weight:400;margin-bottom:4px;text-align:center}
+.login-logo em{font-style:italic;color:var(--gold)}
+.login-sub{font-size:10px;letter-spacing:3px;color:var(--dim);text-transform:uppercase;text-align:center;margin-bottom:36px}
+.field{margin-bottom:20px}
+.field label{display:block;font-size:9px;letter-spacing:3px;color:var(--dim);text-transform:uppercase;margin-bottom:8px}
+.field input{width:100%;padding:12px 14px;background:var(--surface);border:1px solid var(--border2);color:var(--text);font-size:12px;letter-spacing:1px;outline:none;transition:border-color .2s}
+.field input:focus{border-color:var(--gold)}
+.btn-login{width:100%;padding:13px;background:var(--gold);color:#0e1014;border:none;font-size:11px;letter-spacing:3px;text-transform:uppercase;font-weight:500;transition:all .25s;margin-top:8px}
+.btn-login:hover{background:var(--gold2)}
+.login-error{font-size:10px;color:var(--red);text-align:center;margin-top:12px;min-height:16px;letter-spacing:1px}
+
+#app{display:none;min-height:100vh}
+#app.show{display:flex}
+
+.sidebar{width:240px;min-height:100vh;background:var(--bg2);border-right:1px solid var(--border2);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100}
+.sb-logo{padding:24px 20px;border-bottom:1px solid var(--border2)}
+.sb-logo-name{font-family:'Playfair Display',serif;font-size:18px;color:var(--white);font-weight:400}
+.sb-logo-name em{font-style:italic;color:var(--gold)}
+.sb-logo-sub{font-size:9px;letter-spacing:2px;color:var(--dim);text-transform:uppercase;margin-top:2px}
+.sb-nav{flex:1;padding:16px 0;overflow-y:auto}
+.sb-section{font-size:8px;letter-spacing:3px;color:var(--dim);text-transform:uppercase;padding:12px 20px 6px}
+.sb-link{display:flex;align-items:center;gap:10px;padding:10px 20px;font-size:11px;letter-spacing:1px;color:var(--dim);transition:all .2s;border-left:2px solid transparent}
+.sb-link:hover{color:var(--text);background:var(--golddim)}
+.sb-link.active{color:var(--gold);border-left-color:var(--gold);background:var(--golddim)}
+.sb-icon{font-size:14px;width:18px;text-align:center}
+.sb-footer{padding:16px 20px;border-top:1px solid var(--border2);display:flex;align-items:center;justify-content:space-between}
+.sb-user{font-size:10px;color:var(--dim);letter-spacing:1px}
+.sb-user strong{color:var(--text);display:block;font-size:11px}
+.btn-logout{font-size:9px;letter-spacing:2px;text-transform:uppercase;padding:5px 10px;border:1px solid var(--border);color:var(--dim);background:none;transition:all .2s}
+.btn-logout:hover{border-color:var(--red);color:var(--red)}
+
+.main{margin-left:240px;flex:1;display:flex;flex-direction:column;min-height:100vh}
+.topbar{height:56px;background:var(--bg2);border-bottom:1px solid var(--border2);display:flex;align-items:center;justify-content:space-between;padding:0 28px;position:sticky;top:0;z-index:50}
+.topbar-title{font-family:'Playfair Display',serif;font-size:18px;color:var(--white);font-weight:400}
+.topbar-title em{font-style:italic;color:var(--gold)}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.status-dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);animation:pulse 2s infinite}
+.status-txt{font-size:9px;letter-spacing:2px;color:var(--dim);text-transform:uppercase}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+.content{flex:1;padding:28px}
+.page{display:none}
+.page.active{display:block}
+
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:28px}
+.stat-card{background:var(--bg2);border:1px solid var(--border2);padding:20px;transition:border-color .25s;position:relative;overflow:hidden}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--gold),transparent);transform:scaleX(0);transform-origin:left;transition:transform .3s}
+.stat-card:hover{border-color:var(--gold)}
+.stat-card:hover::before{transform:scaleX(1)}
+.stat-icon{font-size:22px;margin-bottom:10px;opacity:.8}
+.stat-val{font-family:'Playfair Display',serif;font-size:32px;color:var(--gold);font-weight:400;line-height:1;margin-bottom:4px}
+.stat-lbl{font-size:9px;letter-spacing:2px;color:var(--dim);text-transform:uppercase}
+
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.sec-hdr h2{font-family:'Playfair Display',serif;font-size:20px;color:var(--white);font-weight:400}
+.sec-hdr h2 em{font-style:italic;color:var(--gold)}
+
+.btn-primary{padding:9px 20px;background:var(--gold);color:#0e1014;border:none;font-size:10px;letter-spacing:2px;text-transform:uppercase;font-weight:500;transition:all .25s}
+.btn-primary:hover{background:var(--gold2)}
+.btn-secondary{padding:9px 20px;background:transparent;color:var(--silver);border:1px solid var(--border);font-size:10px;letter-spacing:2px;text-transform:uppercase;transition:all .25s}
+.btn-secondary:hover{border-color:var(--gold);color:var(--gold)}
+.btn-danger{padding:6px 14px;background:transparent;color:var(--red);border:1px solid rgba(231,76,60,.3);font-size:9px;letter-spacing:1px;text-transform:uppercase;transition:all .25s}
+.btn-danger:hover{background:rgba(231,76,60,.1)}
+.btn-success{padding:6px 14px;background:transparent;color:var(--green);border:1px solid rgba(46,204,113,.3);font-size:9px;letter-spacing:1px;text-transform:uppercase;transition:all .25s}
+.btn-success:hover{background:rgba(46,204,113,.1)}
+
+.tbl-wrap{background:var(--bg2);border:1px solid var(--border2);overflow:hidden}
+.tbl{width:100%;border-collapse:collapse}
+.tbl th{padding:12px 16px;text-align:left;font-size:9px;letter-spacing:2px;color:var(--dim);text-transform:uppercase;border-bottom:1px solid var(--border2);background:var(--bg3)}
+.tbl td{padding:12px 16px;font-size:11px;color:var(--text);border-bottom:1px solid var(--border2);transition:background .15s}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:var(--golddim)}
+.badge{display:inline-block;padding:2px 8px;font-size:9px;letter-spacing:1px;text-transform:uppercase}
+.badge-green{background:rgba(46,204,113,.1);color:var(--green);border:1px solid rgba(46,204,113,.2)}
+.badge-dim{background:var(--surface);color:var(--dim);border:1px solid var(--border2)}
+.badge-amber{background:rgba(243,156,18,.1);color:var(--amber);border:1px solid rgba(243,156,18,.2)}
+
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.show{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--border);width:100%;max-width:640px;max-height:90vh;overflow-y:auto;position:relative}
+.modal::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--gold),transparent)}
+.modal-hdr{padding:20px 24px;border-bottom:1px solid var(--border2);display:flex;align-items:center;justify-content:space-between}
+.modal-hdr h3{font-family:'Playfair Display',serif;font-size:18px;color:var(--white);font-weight:400}
+.modal-close{background:none;border:none;color:var(--dim);font-size:18px;transition:color .2s;padding:4px}
+.modal-close:hover{color:var(--red)}
+.modal-body{padding:24px}
+.form-field{margin-bottom:18px}
+.form-field label{display:block;font-size:9px;letter-spacing:3px;color:var(--dim);text-transform:uppercase;margin-bottom:7px}
+.form-field input,.form-field textarea,.form-field select{width:100%;padding:10px 12px;background:var(--surface);border:1px solid var(--border2);color:var(--text);font-size:12px;outline:none;transition:border-color .2s;resize:vertical}
+.form-field input:focus,.form-field textarea:focus,.form-field select:focus{border-color:var(--gold)}
+.form-field textarea{min-height:120px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.modal-footer{padding:16px 24px;border-top:1px solid var(--border2);display:flex;justify-content:flex-end;gap:10px}
+
+.msg-card{background:var(--bg2);border:1px solid var(--border2);padding:20px;margin-bottom:12px;transition:border-color .25s;position:relative}
+.msg-card.unread{border-left:2px solid var(--gold)}
+.msg-card:hover{border-color:var(--gold)}
+.msg-meta{display:flex;align-items:center;gap:12px;margin-bottom:8px;flex-wrap:wrap}
+.msg-name{font-size:13px;color:var(--white);font-weight:500}
+.msg-email{font-size:10px;color:var(--dim);letter-spacing:1px}
+.msg-date{font-size:9px;color:var(--dim);letter-spacing:1px;margin-left:auto}
+.msg-subject{font-size:11px;color:var(--gold);margin-bottom:8px;letter-spacing:1px}
+.msg-body{font-size:11px;color:var(--dim);line-height:1.7}
+.msg-actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+
+.empty{text-align:center;padding:60px 20px;color:var(--dim)}
+.empty-icon{font-size:40px;margin-bottom:14px;opacity:.4}
+.empty p{font-size:11px;letter-spacing:1px}
+
+#toast{position:fixed;bottom:24px;right:24px;background:var(--bg2);border:1px solid var(--border);padding:12px 20px;font-size:11px;letter-spacing:1px;z-index:9999;opacity:0;transform:translateY(10px);transition:all .3s;pointer-events:none}
+#toast.show{opacity:1;transform:none}
+#toast.ok{border-color:var(--green);color:var(--green)}
+#toast.err{border-color:var(--red);color:var(--red)}
+
+.loading{display:inline-block;width:14px;height:14px;border:2px solid var(--border2);border-top-color:var(--gold);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+@media(max-width:768px){
+  .sidebar{transform:translateX(-100%);transition:transform .3s}
+  .sidebar.open{transform:none}
+  .main{margin-left:0}
+  .form-row{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">Sys<em>nergia</em></div>
+    <div class="login-sub">Panel de Administraci&oacute;n</div>
+    <div class="field">
+      <label>Usuario</label>
+      <input type="text" id="login-user" placeholder="tu usuario" autocomplete="username">
+    </div>
+    <div class="field">
+      <label>Contrase&ntilde;a</label>
+      <input type="password" id="login-pass" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;" autocomplete="current-password">
+    </div>
+    <button class="btn-login" id="btn-login">Ingresar</button>
+    <div class="login-error" id="login-error"></div>
+  </div>
+</div>
+
+<div id="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-logo">
+      <div class="sb-logo-name">Sys<em>nergia</em></div>
+      <div class="sb-logo-sub">Admin Panel</div>
+    </div>
+    <nav class="sb-nav">
+      <div class="sb-section">Principal</div>
+      <a class="sb-link active" data-page="dashboard" href="#">
+        <span class="sb-icon">&#128202;</span> Dashboard
+      </a>
+      <div class="sb-section">Contenido</div>
+      <a class="sb-link" data-page="posts" href="#">
+        <span class="sb-icon">&#9997;&#65039;</span> Blog
+      </a>
+      <a class="sb-link" data-page="projects" href="#">
+        <span class="sb-icon">&#128193;</span> Proyectos
+      </a>
+      <div class="sb-section">Comunicaci&oacute;n</div>
+      <a class="sb-link" data-page="messages" href="#">
+        <span class="sb-icon">&#128236;</span> Mensajes
+        <span id="unread-badge" style="margin-left:auto;background:var(--gold);color:#000;font-size:9px;padding:1px 6px;display:none"></span>
+      </a>
+      <div class="sb-section">Sistema</div>
+      <a class="sb-link" href="https://sysnergia.com" target="_blank">
+        <span class="sb-icon">&#127760;</span> Ver sitio
+      </a>
+      <a class="sb-link" href="/api/docs" target="_blank">
+        <span class="sb-icon">&#128214;</span> API Docs
+      </a>
+    </nav>
+    <div class="sb-footer">
+      <div class="sb-user">
+        <strong id="sb-username">&mdash;</strong>
+        Administrador
+      </div>
+      <button class="btn-logout" id="btn-logout">Salir</button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-title" id="topbar-title">Dashboard</div>
+      <div class="topbar-right">
+        <div class="status-dot"></div>
+        <span class="status-txt">API Online</span>
+      </div>
+    </div>
+    <div class="content">
+
+      <div class="page active" id="page-dashboard">
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-icon">&#9997;&#65039;</div><div class="stat-val" id="stat-posts">&mdash;</div><div class="stat-lbl">Art&iacute;culos publicados</div></div>
+          <div class="stat-card"><div class="stat-icon">&#128221;</div><div class="stat-val" id="stat-drafts">&mdash;</div><div class="stat-lbl">Borradores</div></div>
+          <div class="stat-card"><div class="stat-icon">&#128193;</div><div class="stat-val" id="stat-projects">&mdash;</div><div class="stat-lbl">Proyectos</div></div>
+          <div class="stat-card"><div class="stat-icon">&#128236;</div><div class="stat-val" id="stat-msgs">&mdash;</div><div class="stat-lbl">Mensajes sin leer</div></div>
+        </div>
+        <div class="sec-hdr">
+          <h2>&Uacute;ltimos <em>art&iacute;culos</em></h2>
+          <button class="btn-primary" onclick="goPage('posts')">Ver todos</button>
+        </div>
+        <div class="tbl-wrap">
+          <table class="tbl">
+            <thead><tr><th>T&iacute;tulo</th><th>Estado</th><th>Fecha</th></tr></thead>
+            <tbody id="dash-posts-list"><tr><td colspan="3" style="text-align:center;color:var(--dim);padding:20px">Cargando...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="page" id="page-posts">
+        <div class="sec-hdr">
+          <h2>Blog <em>t&eacute;cnico</em></h2>
+          <button class="btn-primary" onclick="openPostModal()">+ Nuevo art&iacute;culo</button>
+        </div>
+        <div class="tbl-wrap">
+          <table class="tbl">
+            <thead><tr><th>T&iacute;tulo</th><th>Tags</th><th>Estado</th><th>Fecha</th><th>Acciones</th></tr></thead>
+            <tbody id="posts-list"><tr><td colspan="5" style="text-align:center;color:var(--dim);padding:20px">Cargando...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="page" id="page-projects">
+        <div class="sec-hdr">
+          <h2>Proyectos <em>privados</em></h2>
+          <button class="btn-primary" onclick="openProjectModal()">+ Nuevo proyecto</button>
+        </div>
+        <div class="tbl-wrap">
+          <table class="tbl">
+            <thead><tr><th>T&iacute;tulo</th><th>Stack</th><th>Estado</th><th>Visibilidad</th><th>Acciones</th></tr></thead>
+            <tbody id="projects-list"><tr><td colspan="5" style="text-align:center;color:var(--dim);padding:20px">Cargando...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="page" id="page-messages">
+        <div class="sec-hdr">
+          <h2>Bandeja de <em>mensajes</em></h2>
+          <span id="msgs-count" style="font-size:10px;color:var(--dim);letter-spacing:2px"></span>
+        </div>
+        <div id="messages-list"></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-post">
+  <div class="modal">
+    <div class="modal-hdr">
+      <h3 id="modal-post-title">Nuevo <em>art&iacute;culo</em></h3>
+      <button class="modal-close" onclick="closeModal('modal-post')">&#10005;</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="post-id">
+      <div class="form-field"><label>T&iacute;tulo</label><input type="text" id="post-title" placeholder="T&iacute;tulo del art&iacute;culo"></div>
+      <div class="form-field"><label>Extracto</label><input type="text" id="post-excerpt" placeholder="Breve descripci&oacute;n"></div>
+      <div class="form-field"><label>Contenido (Markdown)</label><textarea id="post-content" style="min-height:200px" placeholder="# T&iacute;tulo&#10;&#10;Escribe aqu&iacute; el contenido..."></textarea></div>
+      <div class="form-row">
+        <div class="form-field"><label>Tags (separados por coma)</label><input type="text" id="post-tags" placeholder="SQL Server, Linux, Azure"></div>
+        <div class="form-field"><label>Estado</label><select id="post-published"><option value="false">Borrador</option><option value="true">Publicado</option></select></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('modal-post')">Cancelar</button>
+      <button class="btn-primary" id="btn-save-post" onclick="savePost()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-project">
+  <div class="modal">
+    <div class="modal-hdr">
+      <h3 id="modal-project-title">Nuevo <em>proyecto</em></h3>
+      <button class="modal-close" onclick="closeModal('modal-project')">&#10005;</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="proj-id">
+      <div class="form-field"><label>T&iacute;tulo</label><input type="text" id="proj-title" placeholder="Nombre del proyecto"></div>
+      <div class="form-field"><label>Descripci&oacute;n</label><textarea id="proj-desc" placeholder="Descripci&oacute;n del proyecto"></textarea></div>
+      <div class="form-row">
+        <div class="form-field"><label>Tech Stack (coma)</label><input type="text" id="proj-stack" placeholder="Python, FastAPI, PostgreSQL"></div>
+        <div class="form-field"><label>Estado</label><select id="proj-status"><option value="en progreso">En progreso</option><option value="completado">Completado</option><option value="pausado">Pausado</option></select></div>
+      </div>
+      <div class="form-row">
+        <div class="form-field"><label>URL Repositorio</label><input type="text" id="proj-repo" placeholder="https://github.com/..."></div>
+        <div class="form-field"><label>URL Demo</label><input type="text" id="proj-demo" placeholder="https://..."></div>
+      </div>
+      <div class="form-field"><label>Visibilidad</label><select id="proj-private"><option value="true">Privado</option><option value="false">P&uacute;blico</option></select></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('modal-project')">Cancelar</button>
+      <button class="btn-primary" onclick="saveProject()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const API='/api';
+let TOKEN=localStorage.getItem('sysnergia_token')||'';
+let USERNAME=localStorage.getItem('sysnergia_user')||'';
+
+async function api(method,path,body=null){
+  const opts={method,headers:{'Content-Type':'application/json',...(TOKEN?{'Authorization':'Bearer '+TOKEN}:{})}};
+  if(body)opts.body=JSON.stringify(body);
+  const res=await fetch(API+path,opts);
+  if(res.status===204)return null;
+  const data=await res.json();
+  if(!res.ok)throw new Error(data.detail||'Error en la solicitud');
+  return data;
+}
+
+function toast(msg,type='ok'){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className='show '+type;
+  setTimeout(()=>t.className='',3000);
+}
+
+async function login(){
+  const user=document.getElementById('login-user').value.trim();
+  const pass=document.getElementById('login-pass').value;
+  const err=document.getElementById('login-error');
+  const btn=document.getElementById('btn-login');
+  if(!user||!pass){err.textContent='Completa todos los campos.';return;}
+  btn.innerHTML='<span class="loading"></span>Ingresando...';
+  btn.disabled=true;err.textContent='';
+  try{
+    const data=await api('POST','/auth/login',{username:user,password:pass});
+    TOKEN=data.access_token;USERNAME=data.username;
+    localStorage.setItem('sysnergia_token',TOKEN);
+    localStorage.setItem('sysnergia_user',USERNAME);
+    showApp();
+  }catch(e){
+    err.textContent=e.message;
+    btn.innerHTML='Ingresar';btn.disabled=false;
+  }
+}
+
+function logout(){
+  TOKEN='';USERNAME='';
+  localStorage.removeItem('sysnergia_token');
+  localStorage.removeItem('sysnergia_user');
+  document.getElementById('app').style.display='none';
+  document.getElementById('login-screen').classList.remove('hide');
+  document.getElementById('login-pass').value='';
+}
+
+function showApp(){
+  document.getElementById('login-screen').classList.add('hide');
+  document.getElementById('app').style.display='flex';
+  document.getElementById('sb-username').textContent=USERNAME;
+  loadDashboard();
+}
+
+if(TOKEN){api('GET','/auth/me').then(()=>showApp()).catch(()=>logout());}
+
+function goPage(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.sb-link').forEach(l=>l.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  document.querySelector('[data-page="'+name+'"]')?.classList.add('active');
+  const titles={dashboard:'Dashboard',posts:'Blog <em>t&eacute;cnico</em>',projects:'Proyectos <em>privados</em>',messages:'Bandeja de <em>mensajes</em>'};
+  document.getElementById('topbar-title').innerHTML=titles[name]||name;
+  if(name==='dashboard')loadDashboard();
+  if(name==='posts')loadPosts();
+  if(name==='projects')loadProjects();
+  if(name==='messages')loadMessages();
+}
+
+document.querySelectorAll('.sb-link[data-page]').forEach(link=>{
+  link.addEventListener('click',e=>{e.preventDefault();goPage(link.dataset.page);});
+});
+
+async function loadDashboard(){
+  try{
+    const[posts,projects,msgs]=await Promise.all([
+      api('GET','/posts/admin/all'),
+      api('GET','/projects'),
+      api('GET','/contact'),
+    ]);
+    const published=posts.filter(p=>p.published).length;
+    const drafts=posts.filter(p=>!p.published).length;
+    const unread=msgs.filter(m=>!m.read).length;
+    document.getElementById('stat-posts').textContent=published;
+    document.getElementById('stat-drafts').textContent=drafts;
+    document.getElementById('stat-projects').textContent=projects.length;
+    document.getElementById('stat-msgs').textContent=unread;
+    const badge=document.getElementById('unread-badge');
+    if(unread>0){badge.textContent=unread;badge.style.display='inline';}
+    else badge.style.display='none';
+    const tbody=document.getElementById('dash-posts-list');
+    if(posts.length===0){tbody.innerHTML='<tr><td colspan="3" style="text-align:center;color:var(--dim);padding:20px">Sin art&iacute;culos a&uacute;n</td></tr>';return;}
+    tbody.innerHTML=posts.slice(0,5).map(p=>'<tr><td>'+p.title+'</td><td><span class="badge '+(p.published?'badge-green':'badge-dim')+'">'+(p.published?'Publicado':'Borrador')+'</span></td><td style="color:var(--dim)">'+new Date(p.created_at).toLocaleDateString('es-CL')+'</td></tr>').join('');
+  }catch(e){toast('Error cargando dashboard','err');}
+}
+
+let posts_data=[];
+async function loadPosts(){
+  const tbody=document.getElementById('posts-list');
+  tbody.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--dim);padding:20px"><span class="loading"></span>Cargando...</td></tr>';
+  try{
+    posts_data=await api('GET','/posts/admin/all');
+    if(posts_data.length===0){tbody.innerHTML='<tr><td colspan="5"><div class="empty"><div class="empty-icon">&#9997;&#65039;</div><p>Sin art&iacute;culos. Crea el primero.</p></div></td></tr>';return;}
+    tbody.innerHTML=posts_data.map(p=>'<tr><td><strong style="color:var(--white)">'+p.title+'</strong><br><span style="color:var(--dim);font-size:10px">'+p.slug+'</span></td><td style="color:var(--dim);font-size:10px">'+((p.tags||[]).join(', ')||'&mdash;')+'</td><td><span class="badge '+(p.published?'badge-green':'badge-dim')+'">'+(p.published?'Publicado':'Borrador')+'</span></td><td style="color:var(--dim)">'+new Date(p.created_at).toLocaleDateString('es-CL')+'</td><td><button class="btn-success" onclick="editPost('+p.id+')" style="margin-right:6px">Editar</button><button class="btn-danger" onclick="deletePost('+p.id+')">Eliminar</button></td></tr>').join('');
+  }catch(e){toast('Error cargando posts','err');}
+}
+
+function openPostModal(){
+  ['post-id','post-title','post-excerpt','post-content','post-tags'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('post-published').value='false';
+  document.getElementById('modal-post-title').innerHTML='Nuevo <em>art&iacute;culo</em>';
+  document.getElementById('modal-post').classList.add('show');
+}
+
+function editPost(id){
+  const p=posts_data.find(x=>x.id===id);if(!p)return;
+  document.getElementById('post-id').value=p.id;
+  document.getElementById('post-title').value=p.title;
+  document.getElementById('post-excerpt').value=p.excerpt||'';
+  document.getElementById('post-content').value=p.content;
+  document.getElementById('post-tags').value=(p.tags||[]).join(', ');
+  document.getElementById('post-published').value=String(p.published);
+  document.getElementById('modal-post-title').innerHTML='Editar <em>art&iacute;culo</em>';
+  document.getElementById('modal-post').classList.add('show');
+}
+
+async function savePost(){
+  const id=document.getElementById('post-id').value;
+  const title=document.getElementById('post-title').value.trim();
+  if(!title){toast('El t&iacute;tulo es requerido','err');return;}
+  const body={title,excerpt:document.getElementById('post-excerpt').value.trim()||null,content:document.getElementById('post-content').value.trim(),tags:document.getElementById('post-tags').value.split(',').map(t=>t.trim()).filter(Boolean),published:document.getElementById('post-published').value==='true'};
+  const btn=document.getElementById('btn-save-post');
+  btn.innerHTML='<span class="loading"></span>Guardando...';btn.disabled=true;
+  try{
+    if(id)await api('PUT','/posts/'+id,body);
+    else await api('POST','/posts',body);
+    toast(id?'Art&iacute;culo actualizado':'Art&iacute;culo creado','ok');
+    closeModal('modal-post');loadPosts();
+  }catch(e){toast(e.message,'err');}
+  finally{btn.innerHTML='Guardar';btn.disabled=false;}
+}
+
+async function deletePost(id){
+  if(!confirm('&iquest;Eliminar este art&iacute;culo?'))return;
+  try{await api('DELETE','/posts/'+id);toast('Art&iacute;culo eliminado','ok');loadPosts();}
+  catch(e){toast(e.message,'err');}
+}
+
+let projects_data=[];
+async function loadProjects(){
+  const tbody=document.getElementById('projects-list');
+  tbody.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--dim);padding:20px"><span class="loading"></span>Cargando...</td></tr>';
+  try{
+    projects_data=await api('GET','/projects');
+    if(projects_data.length===0){tbody.innerHTML='<tr><td colspan="5"><div class="empty"><div class="empty-icon">&#128193;</div><p>Sin proyectos. Crea el primero.</p></div></td></tr>';return;}
+    tbody.innerHTML=projects_data.map(p=>'<tr><td><strong style="color:var(--white)">'+p.title+'</strong></td><td style="color:var(--dim);font-size:10px">'+((p.tech_stack||[]).join(', ')||'&mdash;')+'</td><td><span class="badge badge-amber">'+p.status+'</span></td><td><span class="badge '+(p.private?'badge-dim':'badge-green')+'">'+(p.private?'Privado':'P&uacute;blico')+'</span></td><td><button class="btn-success" onclick="editProject('+p.id+')" style="margin-right:6px">Editar</button><button class="btn-danger" onclick="deleteProject('+p.id+')">Eliminar</button></td></tr>').join('');
+  }catch(e){toast('Error cargando proyectos','err');}
+}
+
+function openProjectModal(){
+  ['proj-id','proj-title','proj-desc','proj-stack','proj-repo','proj-demo'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('proj-status').value='en progreso';
+  document.getElementById('proj-private').value='true';
+  document.getElementById('modal-project-title').innerHTML='Nuevo <em>proyecto</em>';
+  document.getElementById('modal-project').classList.add('show');
+}
+
+function editProject(id){
+  const p=projects_data.find(x=>x.id===id);if(!p)return;
+  document.getElementById('proj-id').value=p.id;
+  document.getElementById('proj-title').value=p.title;
+  document.getElementById('proj-desc').value=p.description||'';
+  document.getElementById('proj-stack').value=(p.tech_stack||[]).join(', ');
+  document.getElementById('proj-repo').value=p.repo_url||'';
+  document.getElementById('proj-demo').value=p.demo_url||'';
+  document.getElementById('proj-status').value=p.status;
+  document.getElementById('proj-private').value=String(p.private);
+  document.getElementById('modal-project-title').innerHTML='Editar <em>proyecto</em>';
+  document.getElementById('modal-project').classList.add('show');
+}
+
+async function saveProject(){
+  const id=document.getElementById('proj-id').value;
+  const title=document.getElementById('proj-title').value.trim();
+  if(!title){toast('El t&iacute;tulo es requerido','err');return;}
+  const body={title,description:document.getElementById('proj-desc').value.trim()||null,tech_stack:document.getElementById('proj-stack').value.split(',').map(t=>t.trim()).filter(Boolean),repo_url:document.getElementById('proj-repo').value.trim()||null,demo_url:document.getElementById('proj-demo').value.trim()||null,status:document.getElementById('proj-status').value,private:document.getElementById('proj-private').value==='true'};
+  try{
+    if(id)await api('PUT','/projects/'+id,body);
+    else await api('POST','/projects',body);
+    toast(id?'Proyecto actualizado':'Proyecto creado','ok');
+    closeModal('modal-project');loadProjects();
+  }catch(e){toast(e.message,'err');}
+}
+
+async function deleteProject(id){
+  if(!confirm('&iquest;Eliminar este proyecto?'))return;
+  try{await api('DELETE','/projects/'+id);toast('Proyecto eliminado','ok');loadProjects();}
+  catch(e){toast(e.message,'err');}
+}
+
+async function loadMessages(){
+  const container=document.getElementById('messages-list');
+  container.innerHTML='<div class="empty"><span class="loading"></span></div>';
+  try{
+    const msgs=await api('GET','/contact');
+    document.getElementById('msgs-count').textContent=msgs.length+' mensaje'+(msgs.length!==1?'s':'');
+    if(msgs.length===0){container.innerHTML='<div class="empty"><div class="empty-icon">&#128236;</div><p>Sin mensajes a&uacute;n.</p></div>';return;}
+    container.innerHTML=msgs.map(m=>'<div class="msg-card '+(m.read?'':'unread')+'" id="msg-'+m.id+'"><div class="msg-meta"><span class="msg-name">'+m.name+'</span><span class="msg-email">'+m.email+'</span><span class="msg-date">'+new Date(m.created_at).toLocaleDateString('es-CL')+'</span></div>'+(m.subject?'<div class="msg-subject">'+m.subject+'</div>':'')+'<div class="msg-body">'+m.message+'</div><div class="msg-actions">'+(!m.read?'<button class="btn-success" onclick="markRead('+m.id+')">Marcar le&iacute;do</button>':'<span style="font-size:9px;color:var(--dim);letter-spacing:1px">&#10003; Le&iacute;do</span>')+'<button class="btn-danger" onclick="deleteMsg('+m.id+')">Eliminar</button><a href="mailto:'+m.email+'" style="padding:6px 14px;font-size:9px;letter-spacing:1px;text-transform:uppercase;border:1px solid var(--border);color:var(--silver);display:inline-block;transition:all .2s">Responder</a></div></div>').join('');
+  }catch(e){toast('Error cargando mensajes','err');}
+}
+
+async function markRead(id){
+  try{await api('PATCH','/contact/'+id+'/read');document.getElementById('msg-'+id)?.classList.remove('unread');toast('Marcado como le&iacute;do','ok');loadDashboard();}
+  catch(e){toast(e.message,'err');}
+}
+
+async function deleteMsg(id){
+  if(!confirm('&iquest;Eliminar este mensaje?'))return;
+  try{await api('DELETE','/contact/'+id);toast('Mensaje eliminado','ok');loadMessages();}
+  catch(e){toast(e.message,'err');}
+}
+
+function closeModal(id){document.getElementById(id).classList.remove('show');}
+document.querySelectorAll('.modal-overlay').forEach(m=>{m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('show');});});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&!document.getElementById('login-screen').classList.contains('hide'))login();
+  if(e.key==='Escape')document.querySelectorAll('.modal-overlay.show').forEach(m=>m.classList.remove('show'));
+});
+document.getElementById('btn-login').addEventListener('click',login);
+document.getElementById('btn-logout').addEventListener('click',logout);
+</script>
+</body>
+</html>

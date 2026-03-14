@@ -2,28 +2,28 @@ import json
 from typing import Optional, List
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from database import get_db, Project
 from auth import get_current_user, User
 
 router = APIRouter(prefix="/api/projects", tags=["projects"])
 
 class ProjectCreate(BaseModel):
-    title:       str
-    description: Optional[str] = None
-    tech_stack:  Optional[List[str]] = []
-    repo_url:    Optional[str] = None
-    demo_url:    Optional[str] = None
-    status:      str = "en progreso"
+    title:       str = Field(min_length=3, max_length=200)
+    description: Optional[str] = Field(default=None, max_length=5000)
+    tech_stack:  List[str] = Field(default_factory=list, max_length=20)
+    repo_url:    Optional[str] = Field(default=None, max_length=500)
+    demo_url:    Optional[str] = Field(default=None, max_length=500)
+    status:      str = Field(default="en progreso", max_length=50)
     private:     bool = True
 
 class ProjectUpdate(BaseModel):
-    title:       Optional[str] = None
-    description: Optional[str] = None
+    title:       Optional[str] = Field(default=None, min_length=3, max_length=200)
+    description: Optional[str] = Field(default=None, max_length=5000)
     tech_stack:  Optional[List[str]] = None
-    repo_url:    Optional[str] = None
-    demo_url:    Optional[str] = None
-    status:      Optional[str] = None
+    repo_url:    Optional[str] = Field(default=None, max_length=500)
+    demo_url:    Optional[str] = Field(default=None, max_length=500)
+    status:      Optional[str] = Field(default=None, max_length=50)
     private:     Optional[bool] = None
 
 class ProjectResponse(BaseModel):

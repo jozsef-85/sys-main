@@ -4,25 +4,25 @@ from datetime import datetime, timezone
 from typing import Optional, List
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from database import get_db, Post
 from auth import get_current_user, User
 
 router = APIRouter(prefix="/api/posts", tags=["blog"])
 
 class PostCreate(BaseModel):
-    title:       str
-    excerpt:     Optional[str] = None
-    content:     str
-    cover_image: Optional[str] = None
-    tags:        Optional[List[str]] = []
+    title:       str = Field(min_length=3, max_length=200)
+    excerpt:     Optional[str] = Field(default=None, max_length=400)
+    content:     str = Field(min_length=1, max_length=50000)
+    cover_image: Optional[str] = Field(default=None, max_length=500)
+    tags:        List[str] = Field(default_factory=list, max_length=20)
     published:   bool = False
 
 class PostUpdate(BaseModel):
-    title:       Optional[str] = None
-    excerpt:     Optional[str] = None
-    content:     Optional[str] = None
-    cover_image: Optional[str] = None
+    title:       Optional[str] = Field(default=None, min_length=3, max_length=200)
+    excerpt:     Optional[str] = Field(default=None, max_length=400)
+    content:     Optional[str] = Field(default=None, min_length=1, max_length=50000)
+    cover_image: Optional[str] = Field(default=None, max_length=500)
     tags:        Optional[List[str]] = None
     published:   Optional[bool] = None
 

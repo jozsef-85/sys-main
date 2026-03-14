@@ -9,10 +9,17 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-DATABASE_URL = os.getenv(
-    "DATABASE_URL",
-    "postgresql://sysnergia:password@localhost:5432/sysnergia_db"
-)
+def _load_database_url() -> str:
+    database_url = os.getenv("DATABASE_URL", "").strip()
+    environment = os.getenv("ENVIRONMENT", "production").strip().lower()
+    if database_url:
+        return database_url
+    if environment == "development":
+        return "postgresql://sysnergia:password@localhost:5432/sysnergia_db"
+    raise RuntimeError("DATABASE_URL es obligatoria fuera de desarrollo.")
+
+
+DATABASE_URL = _load_database_url()
 
 engine = create_engine(
     DATABASE_URL,
