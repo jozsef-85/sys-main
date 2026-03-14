@@ -10,7 +10,7 @@
 :root{
   --bg:#0e1014;--bg2:#13171c;--bg3:#191e25;--surface:#1e242d;
   --gold:#c9a84c;--gold2:#e8c96a;--golddim:rgba(201,168,76,.1);
-  --silver:#8a9bb0;--text:#d4cec6;--dim:#5a6472;--mute:#2a3040;
+  --silver:#a7b5c5;--text:#d4cec6;--dim:#7c8797;--mute:#2a3040;
   --border:rgba(201,168,76,.15);--border2:rgba(255,255,255,.06);
   --white:#f0ece8;--green:#2ecc71;--red:#e74c3c;--amber:#f39c12;
 }
@@ -41,6 +41,8 @@ input,textarea,select{font-family:'DM Mono',monospace}
 #app.show{display:flex}
 
 .sidebar{width:240px;min-height:100vh;background:var(--bg2);border-right:1px solid var(--border2);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100}
+.sidebar-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.6);opacity:0;pointer-events:none;transition:opacity .25s;z-index:90}
+.sidebar-backdrop.show{opacity:1;pointer-events:auto}
 .sb-logo{padding:24px 20px;border-bottom:1px solid var(--border2)}
 .sb-logo-name{font-family:'Playfair Display',serif;font-size:18px;color:var(--white);font-weight:400}
 .sb-logo-name em{font-style:italic;color:var(--gold)}
@@ -59,9 +61,11 @@ input,textarea,select{font-family:'DM Mono',monospace}
 
 .main{margin-left:240px;flex:1;display:flex;flex-direction:column;min-height:100vh}
 .topbar{height:56px;background:var(--bg2);border-bottom:1px solid var(--border2);display:flex;align-items:center;justify-content:space-between;padding:0 28px;position:sticky;top:0;z-index:50}
+.topbar-left{display:flex;align-items:center;gap:12px;min-width:0}
 .topbar-title{font-family:'Playfair Display',serif;font-size:18px;color:var(--white);font-weight:400}
 .topbar-title em{font-style:italic;color:var(--gold)}
 .topbar-right{display:flex;align-items:center;gap:10px}
+.menu-toggle{display:none;align-items:center;justify-content:center;width:38px;height:38px;border:1px solid var(--border);background:transparent;color:var(--silver);font-size:16px;flex-shrink:0}
 .status-dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);animation:pulse 2s infinite}
 .status-txt{font-size:9px;letter-spacing:2px;color:var(--dim);text-transform:uppercase}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
@@ -98,6 +102,9 @@ input,textarea,select{font-family:'DM Mono',monospace}
 .tbl td{padding:12px 16px;font-size:11px;color:var(--text);border-bottom:1px solid var(--border2);transition:background .15s}
 .tbl tr:last-child td{border-bottom:none}
 .tbl tr:hover td{background:var(--golddim)}
+.tbl.mobile-cards td::before{display:none}
+.tbl td[colspan]{padding:0}
+.tbl td[colspan] .empty{padding:48px 20px}
 .badge{display:inline-block;padding:2px 8px;font-size:9px;letter-spacing:1px;text-transform:uppercase}
 .badge-green{background:rgba(46,204,113,.1);color:var(--green);border:1px solid rgba(46,204,113,.2)}
 .badge-dim{background:var(--surface);color:var(--dim);border:1px solid var(--border2)}
@@ -144,10 +151,70 @@ input,textarea,select{font-family:'DM Mono',monospace}
 @keyframes spin{to{transform:rotate(360deg)}}
 
 @media(max-width:768px){
+  body{overflow-x:hidden}
+  #login-screen{padding:20px}
+  .login-box{padding:32px 24px}
   .sidebar{transform:translateX(-100%);transition:transform .3s}
   .sidebar.open{transform:none}
+  .menu-toggle{display:flex}
   .main{margin-left:0}
+  .topbar{padding:0 16px}
+  .topbar-right{gap:8px}
+  .topbar-title{font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .content{padding:16px}
+  .sec-hdr{flex-direction:column;align-items:flex-start;gap:12px}
+  .tbl-wrap{overflow-x:auto}
+  .stats-grid{grid-template-columns:1fr}
+  .modal-overlay{padding:12px}
+  .modal-hdr,.modal-body,.modal-footer{padding-left:16px;padding-right:16px}
   .form-row{grid-template-columns:1fr}
+  .tbl.mobile-cards{min-width:0}
+  .tbl.mobile-cards thead{display:none}
+  .tbl.mobile-cards tbody,
+  .tbl.mobile-cards tr,
+  .tbl.mobile-cards td{display:block;width:100%}
+  .tbl.mobile-cards tbody{padding:12px}
+  .tbl.mobile-cards tr{background:var(--bg2);border:1px solid var(--border2);margin-bottom:12px}
+  .tbl.mobile-cards tr:last-child{margin-bottom:0}
+  .tbl.mobile-cards td{border-bottom:1px solid var(--border2);padding:12px 14px 12px 132px;position:relative;min-height:44px}
+  .tbl.mobile-cards td:last-child{border-bottom:none}
+  .tbl.mobile-cards td::before{
+    content:attr(data-label);
+    position:absolute;
+    left:14px;
+    top:12px;
+    width:104px;
+    color:var(--dim);
+    font-size:9px;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+  }
+  .tbl.mobile-cards td[data-label="Acciones"]{padding-left:14px}
+  .tbl.mobile-cards td[data-label="Acciones"]::before{position:static;display:block;width:auto;margin-bottom:10px}
+  .tbl.mobile-cards td[data-label="Acciones"] button{width:100%;margin:0 0 8px 0 !important}
+  .tbl.mobile-cards td[data-label="Acciones"] button:last-child{margin-bottom:0 !important}
+  .tbl.mobile-cards td[colspan]{
+    display:block;
+    width:100%;
+    padding:0;
+    min-height:0;
+  }
+  .tbl.mobile-cards td[colspan]::before{display:none}
+  .tbl.mobile-cards td[colspan] .empty{
+    padding:32px 16px;
+  }
+  .tbl.mobile-cards td[colspan] .empty-icon{
+    font-size:34px;
+    margin-bottom:10px;
+  }
+}
+@media(max-width:480px){
+  .topbar-right{display:none}
+  .sb-footer{padding:14px 16px}
+  .msg-meta{align-items:flex-start;flex-direction:column;gap:6px}
+  .msg-date{margin-left:0}
+  .msg-actions{flex-direction:column;align-items:stretch}
+  .msg-actions > *{width:100%;text-align:center;justify-content:center}
 }
 </style>
 </head>
@@ -171,6 +238,7 @@ input,textarea,select{font-family:'DM Mono',monospace}
 </div>
 
 <div id="app">
+  <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
   <aside class="sidebar" id="sidebar">
     <div class="sb-logo">
       <div class="sb-logo-name">Sys<em>nergia</em></div>
@@ -212,7 +280,10 @@ input,textarea,select{font-family:'DM Mono',monospace}
 
   <div class="main">
     <div class="topbar">
-      <div class="topbar-title" id="topbar-title">Dashboard</div>
+      <div class="topbar-left">
+        <button class="menu-toggle" id="menu-toggle" aria-label="Abrir menu">&#9776;</button>
+        <div class="topbar-title" id="topbar-title">Dashboard</div>
+      </div>
       <div class="topbar-right">
         <div class="status-dot"></div>
         <span class="status-txt">API Online</span>
@@ -229,7 +300,10 @@ input,textarea,select{font-family:'DM Mono',monospace}
         </div>
         <div class="sec-hdr">
           <h2>&Uacute;ltimos <em>art&iacute;culos</em></h2>
-          <button class="btn-primary" onclick="goPage('posts')">Ver todos</button>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button class="btn-secondary" onclick="goPage('posts')">Ver todos</button>
+            <button class="btn-primary" onclick="openPostModal()">+ Escribir art&iacute;culo</button>
+          </div>
         </div>
         <div class="tbl-wrap">
           <table class="tbl">
@@ -245,7 +319,7 @@ input,textarea,select{font-family:'DM Mono',monospace}
           <button class="btn-primary" onclick="openPostModal()">+ Nuevo art&iacute;culo</button>
         </div>
         <div class="tbl-wrap">
-          <table class="tbl">
+          <table class="tbl mobile-cards">
             <thead><tr><th>T&iacute;tulo</th><th>Tags</th><th>Estado</th><th>Fecha</th><th>Acciones</th></tr></thead>
             <tbody id="posts-list"><tr><td colspan="5" style="text-align:center;color:var(--dim);padding:20px">Cargando...</td></tr></tbody>
           </table>
@@ -258,7 +332,7 @@ input,textarea,select{font-family:'DM Mono',monospace}
           <button class="btn-primary" onclick="openProjectModal()">+ Nuevo proyecto</button>
         </div>
         <div class="tbl-wrap">
-          <table class="tbl">
+          <table class="tbl mobile-cards">
             <thead><tr><th>T&iacute;tulo</th><th>Stack</th><th>Estado</th><th>Visibilidad</th><th>Acciones</th></tr></thead>
             <tbody id="projects-list"><tr><td colspan="5" style="text-align:center;color:var(--dim);padding:20px">Cargando...</td></tr></tbody>
           </table>
@@ -333,6 +407,19 @@ input,textarea,select{font-family:'DM Mono',monospace}
 const API='/api';
 let TOKEN=localStorage.getItem('sysnergia_token')||'';
 let USERNAME=localStorage.getItem('sysnergia_user')||'';
+const sidebar=document.getElementById('sidebar');
+const sidebarBackdrop=document.getElementById('sidebar-backdrop');
+const menuToggle=document.getElementById('menu-toggle');
+
+function closeSidebar(){
+  sidebar.classList.remove('open');
+  sidebarBackdrop.classList.remove('show');
+}
+
+function toggleSidebar(){
+  sidebar.classList.toggle('open');
+  sidebarBackdrop.classList.toggle('show');
+}
 
 async function api(method,path,body=null){
   const opts={method,headers:{'Content-Type':'application/json',...(TOKEN?{'Authorization':'Bearer '+TOKEN}:{})}};
@@ -383,6 +470,7 @@ function showApp(){
   document.getElementById('login-screen').classList.add('hide');
   document.getElementById('app').style.display='flex';
   document.getElementById('sb-username').textContent=USERNAME;
+  closeSidebar();
   loadDashboard();
 }
 
@@ -395,6 +483,7 @@ function goPage(name){
   document.querySelector('[data-page="'+name+'"]')?.classList.add('active');
   const titles={dashboard:'Dashboard',posts:'Blog <em>t&eacute;cnico</em>',projects:'Proyectos <em>privados</em>',messages:'Bandeja de <em>mensajes</em>'};
   document.getElementById('topbar-title').innerHTML=titles[name]||name;
+  if(window.innerWidth<=768)closeSidebar();
   if(name==='dashboard')loadDashboard();
   if(name==='posts')loadPosts();
   if(name==='projects')loadProjects();
@@ -404,6 +493,8 @@ function goPage(name){
 document.querySelectorAll('.sb-link[data-page]').forEach(link=>{
   link.addEventListener('click',e=>{e.preventDefault();goPage(link.dataset.page);});
 });
+menuToggle.addEventListener('click',toggleSidebar);
+sidebarBackdrop.addEventListener('click',closeSidebar);
 
 async function loadDashboard(){
   try{
@@ -435,7 +526,7 @@ async function loadPosts(){
   try{
     posts_data=await api('GET','/posts/admin/all');
     if(posts_data.length===0){tbody.innerHTML='<tr><td colspan="5"><div class="empty"><div class="empty-icon">&#9997;&#65039;</div><p>Sin art&iacute;culos. Crea el primero.</p></div></td></tr>';return;}
-    tbody.innerHTML=posts_data.map(p=>'<tr><td><strong style="color:var(--white)">'+p.title+'</strong><br><span style="color:var(--dim);font-size:10px">'+p.slug+'</span></td><td style="color:var(--dim);font-size:10px">'+((p.tags||[]).join(', ')||'&mdash;')+'</td><td><span class="badge '+(p.published?'badge-green':'badge-dim')+'">'+(p.published?'Publicado':'Borrador')+'</span></td><td style="color:var(--dim)">'+new Date(p.created_at).toLocaleDateString('es-CL')+'</td><td><button class="btn-success" onclick="editPost('+p.id+')" style="margin-right:6px">Editar</button><button class="btn-danger" onclick="deletePost('+p.id+')">Eliminar</button></td></tr>').join('');
+    tbody.innerHTML=posts_data.map(p=>'<tr><td data-label="T&iacute;tulo"><strong style="color:var(--white)">'+p.title+'</strong><br><span style="color:var(--dim);font-size:10px">'+p.slug+'</span></td><td data-label="Tags" style="color:var(--dim);font-size:10px">'+((p.tags||[]).join(', ')||'&mdash;')+'</td><td data-label="Estado"><span class="badge '+(p.published?'badge-green':'badge-dim')+'">'+(p.published?'Publicado':'Borrador')+'</span></td><td data-label="Fecha" style="color:var(--dim)">'+new Date(p.created_at).toLocaleDateString('es-CL')+'</td><td data-label="Acciones"><button class="btn-success" onclick="editPost('+p.id+')" style="margin-right:6px">Editar</button><button class="btn-danger" onclick="deletePost('+p.id+')">Eliminar</button></td></tr>').join('');
   }catch(e){toast('Error cargando posts','err');}
 }
 
@@ -487,7 +578,7 @@ async function loadProjects(){
   try{
     projects_data=await api('GET','/projects');
     if(projects_data.length===0){tbody.innerHTML='<tr><td colspan="5"><div class="empty"><div class="empty-icon">&#128193;</div><p>Sin proyectos. Crea el primero.</p></div></td></tr>';return;}
-    tbody.innerHTML=projects_data.map(p=>'<tr><td><strong style="color:var(--white)">'+p.title+'</strong></td><td style="color:var(--dim);font-size:10px">'+((p.tech_stack||[]).join(', ')||'&mdash;')+'</td><td><span class="badge badge-amber">'+p.status+'</span></td><td><span class="badge '+(p.private?'badge-dim':'badge-green')+'">'+(p.private?'Privado':'P&uacute;blico')+'</span></td><td><button class="btn-success" onclick="editProject('+p.id+')" style="margin-right:6px">Editar</button><button class="btn-danger" onclick="deleteProject('+p.id+')">Eliminar</button></td></tr>').join('');
+    tbody.innerHTML=projects_data.map(p=>'<tr><td data-label="T&iacute;tulo"><strong style="color:var(--white)">'+p.title+'</strong></td><td data-label="Stack" style="color:var(--dim);font-size:10px">'+((p.tech_stack||[]).join(', ')||'&mdash;')+'</td><td data-label="Estado"><span class="badge badge-amber">'+p.status+'</span></td><td data-label="Visibilidad"><span class="badge '+(p.private?'badge-dim':'badge-green')+'">'+(p.private?'Privado':'P&uacute;blico')+'</span></td><td data-label="Acciones"><button class="btn-success" onclick="editProject('+p.id+')" style="margin-right:6px">Editar</button><button class="btn-danger" onclick="deleteProject('+p.id+')">Eliminar</button></td></tr>').join('');
   }catch(e){toast('Error cargando proyectos','err');}
 }
 
@@ -559,6 +650,7 @@ document.querySelectorAll('.modal-overlay').forEach(m=>{m.addEventListener('clic
 document.addEventListener('keydown',e=>{
   if(e.key==='Enter'&&!document.getElementById('login-screen').classList.contains('hide'))login();
   if(e.key==='Escape')document.querySelectorAll('.modal-overlay.show').forEach(m=>m.classList.remove('show'));
+  if(e.key==='Escape')closeSidebar();
 });
 document.getElementById('btn-login').addEventListener('click',login);
 document.getElementById('btn-logout').addEventListener('click',logout);
