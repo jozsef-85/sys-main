@@ -73,6 +73,7 @@ input,textarea,select{font-family:'DM Mono',monospace}
 .content{flex:1;padding:28px}
 .page{display:none}
 .page.active{display:block}
+.dashboard-page .stats-grid{margin-bottom:28px}
 
 .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:28px}
 .stat-card{background:var(--bg2);border:1px solid var(--border2);padding:20px;transition:border-color .25s;position:relative;overflow:hidden}
@@ -164,6 +165,10 @@ input,textarea,select{font-family:'DM Mono',monospace}
   .content{padding:16px}
   .sec-hdr{flex-direction:column;align-items:flex-start;gap:12px}
   .tbl-wrap{overflow-x:auto}
+  .dashboard-page.active{display:flex;flex-direction:column}
+  .dashboard-page .sec-hdr{order:1}
+  .dashboard-page .tbl-wrap{order:2}
+  .dashboard-page .stats-grid{order:3;margin-top:20px;margin-bottom:0}
   .stats-grid{grid-template-columns:1fr}
   .modal-overlay{padding:12px}
   .modal-hdr,.modal-body,.modal-footer{padding-left:16px;padding-right:16px}
@@ -291,7 +296,7 @@ input,textarea,select{font-family:'DM Mono',monospace}
     </div>
     <div class="content">
 
-      <div class="page active" id="page-dashboard">
+      <div class="page active dashboard-page" id="page-dashboard">
         <div class="stats-grid">
           <div class="stat-card"><div class="stat-icon">&#9997;&#65039;</div><div class="stat-val" id="stat-posts">&mdash;</div><div class="stat-lbl">Art&iacute;culos publicados</div></div>
           <div class="stat-card"><div class="stat-icon">&#128221;</div><div class="stat-val" id="stat-drafts">&mdash;</div><div class="stat-lbl">Borradores</div></div>
