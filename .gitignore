@@ -1,0 +1,9 @@
+.env
+Backend/venv/
+Backend/__pycache__/
+Backend/**/__pycache__/
+Backend/*.pyc
+*.db
+*.sqlite3
+*.log
+.DS_Store
