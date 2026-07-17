@@ -170,7 +170,7 @@ nav.scrolled{height:50px}
 .sec-t{font-family:'Playfair Display',serif;font-size:clamp(24px,3.5vw,42px);color:var(--white);font-weight:400;line-height:1.15;margin-bottom:44px;padding-bottom:20px;border-bottom:1px solid var(--border2)}
 .sec-t em{font-style:italic;color:var(--gold)}
 
-/* ── SERVER STATUS ────────────── */
+/* ── DIGITAL PLATFORMS ────────── */
 .sgrid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
 .scard{background:var(--bg2);border:1px solid var(--border2);overflow:hidden;transition:border-color .4s,box-shadow .4s,transform .3s}
 .scard:hover{transform:translateY(-3px);box-shadow:0 16px 48px rgba(0,0,0,.3)}
@@ -332,7 +332,6 @@ footer{padding:18px clamp(20px,5vw,60px);border-top:1px solid var(--border2);dis
   <a href="#experience">&#128196; Experiencia</a>
   <a href="#education">&#127891; Educación</a>
   <a href="#blog">&#9997;&#65039; Blog <span class="mm-badge new">Próximo</span></a>
-  <a href="https://admin.sysnergia.com" target="_blank">&#128274; Admin <span class="mm-badge">Privado</span></a>
   <a href="#contact">&#128231; Contacto</a>
 </div>
 
@@ -348,10 +347,7 @@ footer{padding:18px clamp(20px,5vw,60px);border-top:1px solid var(--border2);dis
       <div class="dd-menu">
         <a href="#blog"><span class="ddi">&#9997;&#65039;</span>Blog Técnico<span class="dd-badge new">Próximo</span></a>
         <a href="#education"><span class="ddi">&#127891;</span>Educación</a>
-        <a href="https://admin.sysnergia.com" target="_blank"><span class="ddi">&#128274;</span>Panel Admin</a>
         <a href="https://github.com/jozsef-85" target="_blank"><span class="ddi">&#9000;&#65039;</span>GitHub</a>
-        <a href="https://srv.sysnergia.com" target="_blank"><span class="ddi">&#9889;</span>srv.sysnergia.com</a>
-        <a href="https://srv2.sysnergia.com" target="_blank"><span class="ddi">&#128737;</span>srv2.sysnergia.com</a>
       </div>
     </li>
     <li><a href="#contact">Contact</a></li>
@@ -382,7 +378,7 @@ footer{padding:18px clamp(20px,5vw,60px);border-top:1px solid var(--border2);dis
   <div class="hright">
     <div class="h-st"><div class="h-sv" id="cnt1">0</div><div class="h-sl">Años de experiencia</div></div>
     <div class="h-st"><div class="h-sv" id="cnt2">0</div><div class="h-sl">Empresas clave</div></div>
-    <div class="h-st"><div class="h-sv" id="cnt3">0</div><div class="h-sl">Servidores en producción</div></div>
+    <div class="h-st"><div class="h-sv" id="cnt3">0</div><div class="h-sl">Plataformas cloud</div></div>
     <div class="h-st"><div class="h-sv" id="cnt4">0</div><div class="h-sl">Certificaciones</div></div>
     <div class="h-tags">
       <span class="htag on">SQL Server</span><span class="htag on">Windows Server</span>
@@ -415,30 +411,26 @@ footer{padding:18px clamp(20px,5vw,60px);border-top:1px solid var(--border2);dis
 
 <!-- INFRA -->
 <div class="sec" id="infra">
-  <div class="sec-ey">01 &mdash; Infraestructura propia</div>
-  <div class="sec-t">Server Status &middot; <em>sysnergia.com</em></div>
+  <div class="sec-ey">01 &mdash; Presencia digital</div>
+  <div class="sec-t">Servicios <em>&amp;</em> plataformas</div>
   <div class="sgrid">
-    <div class="scard checking" id="c1">
-      <div class="shead"><div class="sname">srv.sysnergia.com</div><div class="sbadge"><div class="sdot"></div><span class="stxt" id="st1">Verificando</span></div></div>
+    <div class="scard online">
+      <div class="shead"><div class="sname">sysnergia.com</div><div class="sbadge"><div class="sdot"></div><span class="stxt">Online</span></div></div>
       <div class="sbody">
-        <div class="smets"><div class="met"><div class="mv" id="p1">&mdash;</div><div class="ml">ms</div></div><div class="met"><div class="mv" id="u1">&mdash;</div><div class="ml">uptime %</div></div><div class="met"><div class="mv" id="k1">0</div><div class="ml">checks</div></div></div>
-        <div class="svcrow"><div class="svc">HTTP/S</div><div class="svc">Nginx/Apache</div><div class="svc">Monitoreo</div><div class="svc">SSH</div></div>
-        <div class="pwrap"><div class="prow"><span>Response time</span><span id="pt1">&mdash;</span></div><div class="ptrack"><div class="pfill" id="pb1" style="width:0%"></div></div></div>
-        <div class="spark" id="sp1"></div>
-        <div class="slog" id="lg1"><div class="ll"><span class="lt">--:--:--</span><span class="ldm">&nbsp;Iniciando...</span></div></div>
+        <div class="smets"><div class="met"><div class="mv">CF</div><div class="ml">Cloudflare</div></div><div class="met"><div class="mv">Pages</div><div class="ml">Hosting</div></div><div class="met"><div class="mv">Git</div><div class="ml">Deploy</div></div></div>
+        <div class="svcrow"><div class="svc">Cloudflare Pages</div><div class="svc">GitHub</div><div class="svc">HTTPS</div><div class="svc">CDN</div></div>
+        <div class="skd">Sitio profesional desplegado automáticamente desde GitHub mediante Cloudflare Pages, con HTTPS y distribución global.</div>
       </div>
-      <div class="sfoot"><a href="https://srv.sysnergia.com" target="_blank" class="surl">&rarr; srv.sysnergia.com</a><div class="sfr"><span class="slc" id="lc1">&mdash;</span><a href="https://srv.sysnergia.com" target="_blank" class="sacc">Acceder &nearr;</a></div></div>
+      <div class="sfoot"><a href="https://sysnergia.com" target="_blank" class="surl">&rarr; sysnergia.com</a></div>
     </div>
-    <div class="scard checking" id="c2">
-      <div class="shead"><div class="sname">srv2.sysnergia.com</div><div class="sbadge"><div class="sdot"></div><span class="stxt" id="st2">Verificando</span></div></div>
+    <div class="scard online">
+      <div class="shead"><div class="sname">GitHub</div><div class="sbadge"><div class="sdot"></div><span class="stxt">Activo</span></div></div>
       <div class="sbody">
-        <div class="smets"><div class="met"><div class="mv" id="p2">&mdash;</div><div class="ml">ms</div></div><div class="met"><div class="mv" id="u2">&mdash;</div><div class="ml">uptime %</div></div><div class="met"><div class="mv" id="k2">0</div><div class="ml">checks</div></div></div>
-        <div class="svcrow"><div class="svc">HTTP/S</div><div class="svc">Grafana</div><div class="svc">Nginx/Apache</div><div class="svc">SSH</div></div>
-        <div class="pwrap"><div class="prow"><span>Response time</span><span id="pt2">&mdash;</span></div><div class="ptrack"><div class="pfill" id="pb2" style="width:0%"></div></div></div>
-        <div class="spark" id="sp2"></div>
-        <div class="slog" id="lg2"><div class="ll"><span class="lt">--:--:--</span><span class="ldm">&nbsp;Iniciando...</span></div></div>
+        <div class="smets"><div class="met"><div class="mv">CI</div><div class="ml">Integración</div></div><div class="met"><div class="mv">CD</div><div class="ml">Despliegue</div></div><div class="met"><div class="mv">Git</div><div class="ml">Versionado</div></div></div>
+        <div class="svcrow"><div class="svc">Control de versiones</div><div class="svc">Automatización</div><div class="svc">Cloud Deploy</div></div>
+        <div class="skd">Código fuente versionado y despliegues automáticos hacia producción desde la rama principal.</div>
       </div>
-      <div class="sfoot"><a href="https://srv2.sysnergia.com" target="_blank" class="surl">&rarr; srv2.sysnergia.com</a><div class="sfr"><span class="slc" id="lc2">&mdash;</span><a href="https://srv2.sysnergia.com" target="_blank" class="sacc">Acceder &nearr;</a></div></div>
+      <div class="sfoot"><a href="https://github.com/jozsef-85" target="_blank" class="surl">&rarr; github.com/jozsef-85</a></div>
     </div>
   </div>
 </div>
@@ -503,7 +495,7 @@ footer{padding:18px clamp(20px,5vw,60px);border-top:1px solid var(--border2);dis
       <span class="btag">Azure</span><span class="btag">Linux</span>
       <span class="btag">Automatización</span><span class="btag">CI/CD</span>
     </div>
-    <div class="bcoming">&#9679; Próximamente en blog.sysnergia.com</div>
+    <div class="bcoming">&#9679; Contenido técnico próximamente</div>
   </div>
 </div>
 
@@ -660,51 +652,6 @@ window.addEventListener('DOMContentLoaded', function() {
     gsap.from('.cert',{scale:.9,opacity:0,duration:.5,stagger:.05,ease:'back.out(1.4)',
       scrollTrigger:{trigger:'.certs',start:'top 90%',toggleActions:'play none none none'}});
   }
-
-  /* SERVER STATUS */
-  var SRV=[{id:1,url:'https://srv.sysnergia.com'},{id:2,url:'https://srv2.sysnergia.com'}];
-  var ST={1:{h:[],c:0,u:0},2:{h:[],c:0,u:0}};
-  function ts(){return new Date().toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit',second:'2-digit'})}
-  function log(id,msg,cls){
-    var el=document.getElementById('lg'+id), d=document.createElement('div');
-    d.className='ll'; d.innerHTML='<span class="lt">'+ts()+'</span><span class="'+(cls||'ldm')+'">&nbsp;'+msg+'</span>';
-    el.insertBefore(d,el.firstChild); while(el.children.length>4) el.removeChild(el.lastChild);
-  }
-  function spark(id){
-    var el=document.getElementById('sp'+id); el.innerHTML='';
-    ST[id].h.slice(-30).forEach(function(v){ var b=document.createElement('div'); b.className='spb'+(v==='up'?' up':v==='slow'?' slow':' down'); el.appendChild(b); });
-  }
-  function setCard(id,ok){
-    document.getElementById('c'+id).className='scard '+(ok?'online':'offline');
-    document.getElementById('st'+id).textContent=ok?'Online':'Offline';
-  }
-  async function check(srv){
-    var id=srv.id, s=ST[id], t0=performance.now(), ok=false, ms=null;
-    try{ var ctrl=new AbortController(); setTimeout(function(){ctrl.abort()},8000);
-      await fetch(srv.url,{method:'HEAD',mode:'no-cors',signal:ctrl.signal,cache:'no-store'});
-      ms=Math.round(performance.now()-t0); ok=true; }catch(e){}
-    s.c++; if(ok) s.u++;
-    var pct=Math.round((s.u/s.c)*100);
-    s.h.push(ok?(ms>800?'slow':'up'):'down');
-    setCard(id,ok);
-    document.getElementById('k'+id).textContent=s.c;
-    document.getElementById('u'+id).textContent=pct;
-    document.getElementById('lc'+id).textContent=ts();
-    if(ok&&ms!==null){
-      document.getElementById('p'+id).textContent=ms;
-      document.getElementById('pt'+id).textContent=ms+' ms';
-      document.getElementById('pb'+id).style.width=Math.max(5,Math.min(100,100-(ms/12)))+'%';
-      log(id,ms<300?'&#10003; '+ms+'ms OK':'&#9888; '+ms+'ms lento',ms<300?'lok':'lwarn');
-    } else {
-      document.getElementById('p'+id).textContent='&mdash;';
-      document.getElementById('pt'+id).textContent='sin respuesta';
-      document.getElementById('pb'+id).style.width='0%';
-      log(id,'&#10007; Sin respuesta','lwarn');
-    }
-    spark(id);
-  }
-  function checkAll(){ SRV.forEach(function(s){ check(s); }); }
-  checkAll(); setInterval(checkAll,30000);
 
 }); /* end DOMContentLoaded */
 </script>
