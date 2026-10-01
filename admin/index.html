@@ -409,7 +409,7 @@ input,textarea,select{font-family:'DM Mono',monospace}
 <div id="toast"></div>
 
 <script>
-const API='/api';
+const API=window.SYNERGIA_API||'/api';
 let TOKEN=localStorage.getItem('sysnergia_token')||'';
 let USERNAME=localStorage.getItem('sysnergia_user')||'';
 const sidebar=document.getElementById('sidebar');
@@ -434,6 +434,11 @@ async function api(method,path,body=null){
   const data=await res.json();
   if(!res.ok)throw new Error(data.detail||'Error en la solicitud');
   return data;
+}
+
+function esc(s){
+  if(s==null)return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
 
 function toast(msg,type='ok'){
@@ -520,7 +525,7 @@ async function loadDashboard(){
     else badge.style.display='none';
     const tbody=document.getElementById('dash-posts-list');
     if(posts.length===0){tbody.innerHTML='<tr><td colspan="3" style="text-align:center;color:var(--dim);padding:20px">Sin art&iacute;culos a&uacute;n</td></tr>';return;}
-    tbody.innerHTML=posts.slice(0,5).map(p=>'<tr><td>'+p.title+'</td><td><span class="badge '+(p.published?'badge-green':'badge-dim')+'">'+(p.published?'Publicado':'Borrador')+'</span></td><td style="color:var(--dim)">'+new Date(p.created_at).toLocaleDateString('es-CL')+'</td></tr>').join('');
+    tbody.innerHTML=posts.slice(0,5).map(p=>'<tr><td>'+esc(p.title)+'</td><td><span class="badge '+(p.published?'badge-green':'badge-dim')+'">'+(p.published?'Publicado':'Borrador')+'</span></td><td style="color:var(--dim)">'+new Date(p.created_at).toLocaleDateString('es-CL')+'</td></tr>').join('');
   }catch(e){toast('Error cargando dashboard','err');}
 }
 
@@ -531,7 +536,7 @@ async function loadPosts(){
   try{
     posts_data=await api('GET','/posts/admin/all');
     if(posts_data.length===0){tbody.innerHTML='<tr><td colspan="5"><div class="empty"><div class="empty-icon">&#9997;&#65039;</div><p>Sin art&iacute;culos. Crea el primero.</p></div></td></tr>';return;}
-    tbody.innerHTML=posts_data.map(p=>'<tr><td data-label="T&iacute;tulo"><strong style="color:var(--white)">'+p.title+'</strong><br><span style="color:var(--dim);font-size:10px">'+p.slug+'</span></td><td data-label="Tags" style="color:var(--dim);font-size:10px">'+((p.tags||[]).join(', ')||'&mdash;')+'</td><td data-label="Estado"><span class="badge '+(p.published?'badge-green':'badge-dim')+'">'+(p.published?'Publicado':'Borrador')+'</span></td><td data-label="Fecha" style="color:var(--dim)">'+new Date(p.created_at).toLocaleDateString('es-CL')+'</td><td data-label="Acciones"><button class="btn-success" onclick="editPost('+p.id+')" style="margin-right:6px">Editar</button><button class="btn-danger" onclick="deletePost('+p.id+')">Eliminar</button></td></tr>').join('');
+    tbody.innerHTML=posts_data.map(p=>'<tr><td data-label="T&iacute;tulo"><strong style="color:var(--white)">'+esc(p.title)+'</strong><br><span style="color:var(--dim);font-size:10px">'+esc(p.slug)+'</span></td><td data-label="Tags" style="color:var(--dim);font-size:10px">'+esc((p.tags||[]).join(', ')||'&mdash;')+'</td><td data-label="Estado"><span class="badge '+(p.published?'badge-green':'badge-dim')+'">'+(p.published?'Publicado':'Borrador')+'</span></td><td data-label="Fecha" style="color:var(--dim)">'+new Date(p.created_at).toLocaleDateString('es-CL')+'</td><td data-label="Acciones"><button class="btn-success" onclick="editPost('+p.id+')" style="margin-right:6px">Editar</button><button class="btn-danger" onclick="deletePost('+p.id+')">Eliminar</button></td></tr>').join('');
   }catch(e){toast('Error cargando posts','err');}
 }
 
@@ -583,7 +588,7 @@ async function loadProjects(){
   try{
     projects_data=await api('GET','/projects');
     if(projects_data.length===0){tbody.innerHTML='<tr><td colspan="5"><div class="empty"><div class="empty-icon">&#128193;</div><p>Sin proyectos. Crea el primero.</p></div></td></tr>';return;}
-    tbody.innerHTML=projects_data.map(p=>'<tr><td data-label="T&iacute;tulo"><strong style="color:var(--white)">'+p.title+'</strong></td><td data-label="Stack" style="color:var(--dim);font-size:10px">'+((p.tech_stack||[]).join(', ')||'&mdash;')+'</td><td data-label="Estado"><span class="badge badge-amber">'+p.status+'</span></td><td data-label="Visibilidad"><span class="badge '+(p.private?'badge-dim':'badge-green')+'">'+(p.private?'Privado':'P&uacute;blico')+'</span></td><td data-label="Acciones"><button class="btn-success" onclick="editProject('+p.id+')" style="margin-right:6px">Editar</button><button class="btn-danger" onclick="deleteProject('+p.id+')">Eliminar</button></td></tr>').join('');
+    tbody.innerHTML=projects_data.map(p=>'<tr><td data-label="T&iacute;tulo"><strong style="color:var(--white)">'+esc(p.title)+'</strong></td><td data-label="Stack" style="color:var(--dim);font-size:10px">'+esc((p.tech_stack||[]).join(', ')||'&mdash;')+'</td><td data-label="Estado"><span class="badge badge-amber">'+esc(p.status)+'</span></td><td data-label="Visibilidad"><span class="badge '+(p.private?'badge-dim':'badge-green')+'">'+(p.private?'Privado':'P&uacute;blico')+'</span></td><td data-label="Acciones"><button class="btn-success" onclick="editProject('+p.id+')" style="margin-right:6px">Editar</button><button class="btn-danger" onclick="deleteProject('+p.id+')">Eliminar</button></td></tr>').join('');
   }catch(e){toast('Error cargando proyectos','err');}
 }
 
@@ -635,7 +640,7 @@ async function loadMessages(){
     const msgs=await api('GET','/contact');
     document.getElementById('msgs-count').textContent=msgs.length+' mensaje'+(msgs.length!==1?'s':'');
     if(msgs.length===0){container.innerHTML='<div class="empty"><div class="empty-icon">&#128236;</div><p>Sin mensajes a&uacute;n.</p></div>';return;}
-    container.innerHTML=msgs.map(m=>'<div class="msg-card '+(m.read?'':'unread')+'" id="msg-'+m.id+'"><div class="msg-meta"><span class="msg-name">'+m.name+'</span><span class="msg-email">'+m.email+'</span><span class="msg-date">'+new Date(m.created_at).toLocaleDateString('es-CL')+'</span></div>'+(m.subject?'<div class="msg-subject">'+m.subject+'</div>':'')+'<div class="msg-body">'+m.message+'</div><div class="msg-actions">'+(!m.read?'<button class="btn-success" onclick="markRead('+m.id+')">Marcar le&iacute;do</button>':'<span style="font-size:9px;color:var(--dim);letter-spacing:1px">&#10003; Le&iacute;do</span>')+'<button class="btn-danger" onclick="deleteMsg('+m.id+')">Eliminar</button><a href="mailto:'+m.email+'" style="padding:6px 14px;font-size:9px;letter-spacing:1px;text-transform:uppercase;border:1px solid var(--border);color:var(--silver);display:inline-block;transition:all .2s">Responder</a></div></div>').join('');
+    container.innerHTML=msgs.map(m=>'<div class="msg-card '+(m.read?'':'unread')+'" id="msg-'+m.id+'"><div class="msg-meta"><span class="msg-name">'+esc(m.name)+'</span><span class="msg-email">'+esc(m.email)+'</span><span class="msg-date">'+new Date(m.created_at).toLocaleDateString('es-CL')+'</span></div>'+(m.subject?'<div class="msg-subject">'+esc(m.subject)+'</div>':'')+'<div class="msg-body">'+esc(m.message)+'</div><div class="msg-actions">'+(!m.read?'<button class="btn-success" onclick="markRead('+m.id+')">Marcar le&iacute;do</button>':'<span style="font-size:9px;color:var(--dim);letter-spacing:1px">&#10003; Le&iacute;do</span>')+'<button class="btn-danger" onclick="deleteMsg('+m.id+')">Eliminar</button><a href="mailto:'+esc(m.email)+'" style="padding:6px 14px;font-size:9px;letter-spacing:1px;text-transform:uppercase;border:1px solid var(--border);color:var(--silver);display:inline-block;transition:all .2s">Responder</a></div></div>').join('');
   }catch(e){toast('Error cargando mensajes','err');}
 }
 

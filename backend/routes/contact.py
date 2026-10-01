@@ -1,6 +1,7 @@
 import os
 import aiosmtplib
 from email.message import EmailMessage
+from datetime import datetime
 from typing import Optional, List
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from sqlalchemy.orm import Session
@@ -34,12 +35,13 @@ class ContactRequest(BaseModel):
     message: str = Field(min_length=10, max_length=5000)
 
 class ContactResponse(BaseModel):
-    id:      int
-    name:    str
-    email:   str
-    subject: Optional[str]
-    message: str
-    read:    bool
+    id:         int
+    name:       str
+    email:      str
+    subject:    Optional[str]
+    message:    str
+    read:       bool
+    created_at: datetime
     class Config:
         from_attributes = True
 

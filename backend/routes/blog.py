@@ -86,7 +86,9 @@ def list_posts(tag: Optional[str]=Query(None), limit: int=Query(20,ge=1,le=100),
                skip: int=Query(0,ge=0), db: Session=Depends(get_db)):
     q = db.query(Post).filter(Post.published == True)
     if tag:
-        q = q.filter(Post.tags.contains(tag))
+        all_posts = q.order_by(Post.created_at.desc()).all()
+        filtered = [p for p in all_posts if tag in parse_tags(p)]
+        return [to_dict(p) for p in filtered][skip:skip+limit]
     return [to_dict(p) for p in q.order_by(Post.created_at.desc()).offset(skip).limit(limit).all()]
 
 @router.get("/admin/all", response_model=List[PostSummary])
